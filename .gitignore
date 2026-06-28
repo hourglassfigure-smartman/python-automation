@@ -4,3 +4,10 @@
 # Byte-compiled / cache
 __pycache__/
 *.py[cod]
+
+# Generated output / logs
+books_*.md
+*.log
+
+# Scratch / temp
+scratch_*

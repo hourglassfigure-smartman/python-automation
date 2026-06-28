@@ -11,3 +11,6 @@ books_*.md
 
 # Scratch / temp
 scratch_*
+
+# Claude Code local settings
+.claude/settings.local.json

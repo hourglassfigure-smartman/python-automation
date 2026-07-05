@@ -11,8 +11,9 @@
 ## 構成
 
 ```
-トランスクリプトJSON or 音声ファイル
-  → (音声の場合) faster-whisper + pyannote で文字起こし・話者分離
+トランスクリプトJSON / 音声ファイル / Plaud録音
+  → (音声の場合)  faster-whisper + pyannote で文字起こし・話者分離
+  → (Plaudの場合) Plaud MCP の get_transcript で文字起こし取得 (話者・時刻付き)
   → metrics.py: 発話比率 / 沈黙 / 話速変化 / 割り込み / 質問分類 / 話題転換・ループ
   → analyze.py: Claude が PCCマーカー照合・強力な質問・見逃しテーマを分析
   → report.py: Markdownレポート
@@ -49,6 +50,35 @@ python -m mentor_coach.cli analyze --audio session.mp3 --save-transcript transcr
 ```
 
 話者の自動判定(質問率ヒューリスティック)が誤っていた場合は `--swap-speakers` を付けてください。
+
+## Plaud の録音から直接分析する
+
+Plaud は録音時に話者ラベル・タイムスタンプ付きの文字起こしを生成するため、
+`get_transcript` の結果をそのまま分析に流し込めます(自前のASR・話者分離が不要)。
+
+セットアップ:
+
+```powershell
+pip install -r mentor-coach\requirements-plaud.txt   # Python MCP SDK
+# Node.js / npx が必要 (Plaud MCP は npx -y @plaud-ai/mcp@latest で起動)
+# 初回実行時にブラウザで Plaud OAuth ログインが走ります
+```
+
+使い方:
+
+```powershell
+cd mentor-coach
+python -m mentor_coach.cli plaud-list                          # 録音一覧 (ID / 日付 / タイトル)
+python -m mentor_coach.cli analyze --plaud-latest -o report.md # 最新録音を分析
+python -m mentor_coach.cli analyze --plaud-file-id <ID> -o report.md
+```
+
+Plaud のレスポンス項目名や時間単位(秒/ミリ秒)が想定と異なる場合は、
+[mentor_coach/plaud.py](mentor_coach/plaud.py) の `_map_item()` と `TIME_SCALE` を調整してください。
+
+> Claude Desktop / Claude Code から会話的に使う場合は、`~/.claude/` 等のMCP設定に
+> `{"mcpServers": {"plaud": {"command": "npx", "args": ["-y", "@plaud-ai/mcp@latest"]}}}`
+> を追加し、「Plaudの最新録音の文字起こしを取得して」と依頼 → 得たJSONを本ツールに渡します。
 
 ## テスト
 

@@ -1,0 +1,4 @@
+# Plaud MCP から録音・文字起こしを取得するために必要 (オプション)
+# 別途 Node.js / npx が必要 (Plaud MCP は npx -y @plaud-ai/mcp@latest で起動)。
+# 初回のみブラウザで Plaud OAuth ログインが走る。
+mcp>=1.2
